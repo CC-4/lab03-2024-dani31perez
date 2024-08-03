@@ -124,17 +124,3 @@ UNARY = "~"
 
 <YYINITIAL>.        { return new Token(Token.ERROR);
                       /* todo lo demas es ERROR */ }
-
-/*
-S ::= E;
-    E ::= E + E
-        | E - E
-        | E * E
-        | E / E
-        | E % E
-        | E ^ E
-        | - E
-        | (E)
-        | number
-        
-*/ 

@@ -12,17 +12,17 @@ import java.util.Stack;
 
 public class Parser {
 
-    // Puntero next que apunta al siguiente token
+    // Puntero next que apunta al siguiente Token
     private int next;
     // Stacks para evaluar en el momento
     private Stack<Double> operandos;
     private Stack<Token> operadores;
-    // LinkedList de tokens
-    private LinkedList<Token> tokens;
+    // LinkedList de Tokens
+    private LinkedList<Token> Tokens;
 
     // Funcion que manda a llamar main para parsear la expresion
-    public boolean parse(LinkedList<Token> tokens) {
-        this.tokens = tokens;
+    public boolean parse(LinkedList<Token> Tokens) {
+        this.Tokens = Tokens;
         this.next = 0;
         this.operandos = new Stack<Double>();
         this.operadores = new Stack<Token>();
@@ -36,23 +36,23 @@ public class Parser {
         // System.out.println("Resultado: " + this.operandos.peek());
 
         // Verifica si terminamos de consumir el input
-        if(this.next != this.tokens.size()) {
+        if(this.next != this.Tokens.size()) {
             return false;
         }
         return true;
     }
 
-    // Verifica que el id sea igual que el id del token al que apunta next
+    // Verifica que el id sea igual que el id del Token al que apunta next
     // Si si avanza el puntero es decir lo consume.
     private boolean term(int id) {
-        if(this.next < this.tokens.size() && this.tokens.get(this.next).equals(id)) {
+        if(this.next < this.Tokens.size() && this.Tokens.get(this.next).equals(id)) {
             
             // Codigo para el Shunting Yard Algorithm
             /*
             if (id == Token.NUMBER) {
 				// Encontramos un numero
 				// Debemos guardarlo en el stack de operandos
-				operandos.push( this.tokens.get(this.next).getVal() );
+				operandos.push( this.Tokens.get(this.next).getVal() );
 
 			} else if (id == Token.SEMI) {
 				// Encontramos un punto y coma
@@ -62,10 +62,10 @@ public class Parser {
 				}
 				
 			} else {
-				// Encontramos algun otro token, es decir un operador
+				// Encontramos algun otro Token, es decir un operador
 				// Lo guardamos en el stack de operadores
 				// Que pushOp haga el trabajo, no quiero hacerlo yo aqui
-				pushOp( this.tokens.get(this.next) );
+				pushOp( this.Tokens.get(this.next) );
 			}
 			*/
 
@@ -133,9 +133,100 @@ public class Parser {
         return E() && term(Token.SEMI);
     }
 
-    private boolean E() {
+    /* TODO: sus otras funciones aqui */
+
+    private boolean E1() {
+        return G();
+    }
+
+    private boolean E2() {
+        return term(Token.NUMBER) && F();
+    }
+
+    private boolean G1() {
+        return term(Token.UNARY) && E();
+    }
+
+    private boolean G2() {
+        return term(Token.LPAREN) && E() && term(Token.RPAREN);
+    }
+
+    private boolean F1() {
+        return term(Token.PLUS) && E();
+    }
+
+    private boolean F2() {
+        return term(Token.MINUS) && E();
+    }
+    
+    private boolean F3() {
+        return term(Token.MULT) && E();
+    }
+    
+    private boolean F4() {
+        return term(Token.DIV) && E();
+    }
+    
+    private boolean F5() {
+        return term(Token.MOD) && E();
+    }
+    
+    private boolean F6() {
+        return term(Token.EXP) && E();
+    }
+    
+    private boolean F7() {
+        return true;
+    }
+    
+    private boolean E() { 
+        int save = this.next;
+
+        this.next = save;
+        if ( E1() ) { return true;}
+
+        this.next = save;
+        if ( E2() ) { return true;}
+
         return false;
     }
 
-    /* TODO: sus otras funciones aqui */
+    private boolean G() { 
+        int save = this.next;
+
+        this.next = save;
+        if ( G1() ) { return true;}
+
+        this.next = save;
+        if ( G2() ) { return true;}
+
+        return false;
+    }
+
+    private boolean F() { 
+        int save = this.next;
+
+        this.next = save;
+        if ( F1() ) { return true;}
+
+        this.next = save;
+        if ( F2() ) { return true;}
+
+        this.next = save;
+        if ( F3() ) { return true;}
+
+        this.next = save;
+        if ( F4() ) { return true;}
+
+        this.next = save;
+        if ( F5() ) { return true;}
+
+        this.next = save;
+        if ( F6() ) { return true;}
+
+        this.next = save;
+        if ( F7() ) { return true;}
+
+        return false;
+    }
 }
