@@ -33,7 +33,7 @@ public class Parser {
 
         // Shunting Yard Algorithm
         // Imprime el resultado de operar el input
-        // System.out.println("Resultado: " + this.operandos.peek());
+        System.out.println("Resultado: " + this.operandos.peek());
 
         // Verifica si terminamos de consumir el input
         if(this.next != this.Tokens.size()) {
@@ -48,7 +48,7 @@ public class Parser {
         if(this.next < this.Tokens.size() && this.Tokens.get(this.next).equals(id)) {
             
             // Codigo para el Shunting Yard Algorithm
-            /*
+            
             if (id == Token.NUMBER) {
 				// Encontramos un numero
 				// Debemos guardarlo en el stack de operandos
@@ -60,14 +60,20 @@ public class Parser {
 				while (!this.operadores.empty()) {
 					popOp();
 				}
-				
-			} else {
+			} else if (id == Token.RPAREN) {
+
+                while (!this.operadores.empty() && !this.operadores.peek().equals(Token.LPAREN)) {
+					popOp();
+				}
+
+                this.operadores.pop();
+            }
+             else {
 				// Encontramos algun otro Token, es decir un operador
 				// Lo guardamos en el stack de operadores
 				// Que pushOp haga el trabajo, no quiero hacerlo yo aqui
 				pushOp( this.Tokens.get(this.next) );
 			}
-			*/
 
             this.next++;
             return true;
@@ -82,10 +88,22 @@ public class Parser {
         /* El codigo de esta seccion se explicara en clase */
 
         switch(op.getId()) {
+            case Token.LPAREN:
+                return 5;
         	case Token.PLUS:
+        		return 1;
+            case Token.MINUS:
         		return 1;
         	case Token.MULT:
         		return 2;
+            case Token.DIV:
+        		return 2;
+            case Token.MOD:
+        		return 2;
+            case Token.EXP:
+        		return 3;
+            case Token.UNARY:
+        		return 4;
         	default:
         		return -1;
         }
@@ -110,6 +128,35 @@ public class Parser {
         	// print para debug, quitarlo al terminar
         	System.out.println("mult " + a + " * " + b);
         	this.operandos.push(a * b);
+        } else if (op.equals(Token.MINUS)) {
+        	double a = this.operandos.pop();
+        	double b = this.operandos.pop();
+        	// print para debug, quitarlo al terminar
+        	System.out.println("minus " + b + " - " + a);
+        	this.operandos.push(b - a);
+        } else if (op.equals(Token.DIV)) {
+        	double a = this.operandos.pop();
+        	double b = this.operandos.pop();
+        	// print para debug, quitarlo al terminar
+        	System.out.println("div " + b + " / " + a);
+        	this.operandos.push(b / a);
+        } else if (op.equals(Token.MOD)) {
+        	double a = this.operandos.pop();
+        	double b = this.operandos.pop();
+        	// print para debug, quitarlo al terminar
+        	System.out.println("mod " + b + " % " + a);
+        	this.operandos.push(b % a);
+        } else if (op.equals(Token.EXP)) {
+        	double a = this.operandos.pop();
+        	double b = this.operandos.pop();
+        	// print para debug, quitarlo al terminar
+        	System.out.println("exp " + b + " ^ " + a);
+        	this.operandos.push(Math.pow(b,a));
+        } else if (op.equals(Token.UNARY)) {
+        	double a = this.operandos.pop();
+        	// print para debug, quitarlo al terminar
+        	System.out.println("unary - " + a );
+        	this.operandos.push(-a);
         }
     }
 
@@ -126,7 +173,20 @@ public class Parser {
         	// Comparamos las precedencias y decidimos si hay que operar
         	// Es posible que necesitemos un ciclo aqui, una vez tengamos varios niveles de precedencia
         	// Al terminar operaciones pendientes, guardamos op en stack
+        if (this.operadores.empty())
+            this.operadores.push(op);
+        else if (this.operadores.peek().equals(Token.LPAREN))
+            this.operadores.push(op);
+        else {
+            int actual = pre(op);
+            int prev = pre( this.operadores.peek() );
 
+            while (actual <= prev && !this.operadores.empty() ) 
+                popOp();
+
+            this.operadores.push(op);
+
+        }
     }
 
     private boolean S() {
@@ -144,11 +204,12 @@ public class Parser {
     }
 
     private boolean G1() {
-        return term(Token.UNARY) && E();
+        return term(Token.LPAREN) && E() && term(Token.RPAREN) && F();
     }
 
     private boolean G2() {
-        return term(Token.LPAREN) && E() && term(Token.RPAREN);
+        return term(Token.UNARY) && E();
+
     }
 
     private boolean F1() {
@@ -202,7 +263,6 @@ public class Parser {
 
         return false;
     }
-
     private boolean F() { 
         int save = this.next;
 
